@@ -1,0 +1,26 @@
+
+{% extends 'basic.html' %}
+{% load static %}
+{%load tailwind_filters %}
+{% block title %} Library Management System {% endblock %}
+{% block css %}
+{% endblock %}
+{% block body %}
+<h1 style="text-align: center; font-size: 24px; margin-bottom: 20px;">staffs Awaiting Approval</h1>
+
+{% if users %}
+    <ul style="list-style-type: none; padding: 0;">
+        {% for user in users %}
+            <li style="margin-bottom: 10px;">
+                <span style="font-size: 18px;">{{ user.username }} - {{ user.email }} -</span>
+                <a href="{% url 'admin_approve_staff' user.id %}" style="padding: 5px 10px; font-size: 16px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin-left: 10px;">
+                    Approve
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p style="text-align: center; font-size: 18px;">No staffs awaiting approval.</p>
+{% endif %}
+
+{% endblock %}

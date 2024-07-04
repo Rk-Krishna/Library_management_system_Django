@@ -1,0 +1,53 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% block title %} Library Management System {% endblock %}
+{% block css %}
+{% endblock %}
+{% block body %}
+<div class="container profile">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="profile-tab">
+                <h1 class="text-3xl font-medium text-gray-900 mb-4" style="text-align:center;">{{user.get_full_name}} Profile</h1>
+                <table class="table table-striped"> 
+                    <tbody>
+                        <tr>
+                            <th scope="row">ID:</th>
+                            <td>{{ user.id }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Username:</th>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Full Name:</th>
+                            <td>{{ user.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Email:</th>
+                            <td>{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Phone Number:</th>
+                            <td>{{ user.student.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Dept:</th>
+                            <td>{{ user.student.dept }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Branch:</th>
+                            <td>{{ user.student.branch }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Register Number:</th>
+                            <td>{{ user.student.register_no }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{%endblock%}
