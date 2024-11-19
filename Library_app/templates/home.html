@@ -1,28 +1,61 @@
-{%extends 'basic.html' %}
-{%block body%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4">
+        <header class="py-6">
+            <h1 class="text-4xl font-bold text-center text-blue-600">Library Management System</h1>
+        </header>
 
+        <main>
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-3xl font-semibold mb-4 text-gray-800">Welcome to Our Library</h2>
+                <p class="text-lg text-gray-600 mb-6">Explore our vast collection of books, manage your account, and discover new reading adventures.</p>
+                <a href="#" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">Get Started</a>
+            </div>
 
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+                    <img src="https://source.unsplash.com/random/400x300?library" alt="Admin" class="w-full h-48 object-cover rounded-lg mb-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Admin Portal</h3>
+                    <p class="text-gray-600 mb-6">Manage books, users, and library operations efficiently.</p>
+                    <a href="login/" class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition duration-300">Admin Login</a>
+                </div>
 
-<div class="p-4 bg-light">
-    <div class="container-fluid py-5">
-      <h1 class="display-5 fw-bold">Custom jumbotron</h1>
-      <p class="col-md-8 fs-4">Using a series of utilities, you can create this jumbotron, just like the one in previous versions of Bootstrap. Check out the examples below for how you can remix and restyle it to your liking.</p>
-      <button class="btn btn-primary btn-lg" type="button">Example button</button>
+                <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+                    <img src="https://source.unsplash.com/random/400x300?books" alt="Student" class="w-full h-48 object-cover rounded-lg mb-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-800">Student Portal</h3>
+                    <p class="text-gray-600 mb-6">Browse books, manage your loans, and access study resources.</p>
+                    <a href="login/" class="bg-yellow-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-yellow-600 transition duration-300">Student Login</a>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center text-gray-600">
+            <p>&copy; 2023 Library Management System. All rights reserved.</p>
+        </footer>
     </div>
-    <div class="container">
-  <div class="row">
- 
-    <div class="col-lg-6">
-      <img src="" width="50%" height="50%" alt=""><br><br>
-        <a class="btn btn-outline-primary btn-lg" style="text-align:center" href="">Admin</a>
-    </div>
- 
-    <div class="col-lg-6">
-      <img src="" width="50%" height="50%" alt=""><br><br>
-      <a class="btn btn-outline-primary btn-lg" href="">Student</a>
-    </div>
-  </div>
-  </div>
-</div>
 
-{%endblock%}
+    <script>
+        // Add a simple animation to the main heading
+        document.addEventListener('DOMContentLoaded', () => {
+            const heading = document.querySelector('h1');
+            heading.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-1000');
+            setTimeout(() => {
+                heading.classList.remove('opacity-0', 'translate-y-4');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

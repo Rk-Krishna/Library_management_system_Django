@@ -14,10 +14,22 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from .mixins import adminAndLoginRequiredMixin
+
+from .decorators import admin_required
+
+@login_required
+@admin_required
+def admin_dashboard(request):
+    return render(request, 'admin_dashboard.html')
+
+@login_required
+def dashboard(request):
+    if request.user.is_superuser:
+        return redirect('admin_dashboard')
+    return render(request, 'dashboard.html')
 
 
-
-# Create your views here.
 def index(request):
     return render(request,'home.html')
 
@@ -46,21 +58,23 @@ def login_view(request):
 def logout_custom(request):
     logout(request)
     return redirect('library_app')
-
+@login_required
+@admin_required
 def admin_dashboard(request):
     return render(request,'admin_dashboard.html')
 
 def dashboard(request):
     return render(request,'dashboard.html')
-
-class BookCreateView(CreateView):
+@login_required
+@admin_required
+class BookCreateView(adminAndLoginRequiredMixin,CreateView):
     template_name="create_book.html"
     form_class=BookForm
     def get_success_url(self):
         messages.info('Book has been CreatedSuccessfully')
         book=Book.objects.all()
         return reverse('view_book',{'books':book})
-    
+
 class StudentCreateView(CreateView):
       template_name='student_register.html'
       form_class=StudentForm
@@ -72,16 +86,16 @@ class StudentCreateView(CreateView):
       def get_success_url(self):
         return reverse('login')
     
-
+@login_required
 def student_profile(request):
     return render(request,'student_profile.html')  
 
 
-
+@login_required
 def staff_profile(request):
     return render(request,'staff_profile.html')  
 
-
+@login_required
 def student_edit_profile(request):
      student = Student.objects.get(user=request.user)
 
@@ -107,7 +121,7 @@ def student_edit_profile(request):
         return render(request, "student_profile.html")
      else:
         return render(request, "student_edit_profile.html")
-     
+  
 class StaffCreateView(CreateView):
       template_name='staff_registration.html'
       form_class=StaffForm
@@ -123,7 +137,8 @@ class StaffCreateView(CreateView):
         return response
       def get_success_url(self):
         return reverse('login')
-      
+@login_required
+@admin_required 
 def admin_approve_staff(request, user_id):
     user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
@@ -142,14 +157,14 @@ def admin_approve_staff(request, user_id):
         "user": user
     }
     return render(request, 'admin_approve_staff.html', context)
-
+@login_required
+@admin_required 
 def admin_approve_list(request):
     users = User.objects.filter(is_staff=False,is_student=False)
     context = {
         "users": users
     }
     return render(request, 'admin_approve_list.html', context)
-
 def staff_registration(request):
     form = StaffForm()
     if request.method == "POST":
@@ -187,6 +202,8 @@ def staff_registration(request):
         else:
             messages.error(request, "Invalid form submission.")
     return render(request, "staff_registration.html", {'form': form})
+@login_required
+@admin_required 
 def create_book(request):
     if request.method == "POST":
         name = request.POST['name']
@@ -200,32 +217,42 @@ def create_book(request):
         
         return redirect("view_book")
     return render(request,'create_book.html')
-
+@login_required
+@admin_required 
 def view_book(request):
     books = Book.objects.all()
     return render(request,'view_book.html',{'books':books})
+@login_required
+@admin_required 
 def view_student(request):
     students = Student.objects.all()
     return render(request,'view_students.html',{'students':students})
+@login_required
+@admin_required 
 def view_staff(request):
     staffs = Staff.objects.all()
     return render(request,'view_staff.html',{'staffs':staffs})
+@login_required
 
 def delete_book(request,id):
     books = Book.objects.get(id=id)
     books.delete()
     return redirect("view_book")
-    
+@login_required
+@admin_required   
 def delete_staff(request,id):
     
     staffs = Staff.objects.get(id=id)
     staffs.delete()
     return redirect("view_staff")
-    
+@login_required
+@admin_required  
 def delete_student(request,id):
     student = Student.objects.get(id=id)
     student.delete()
     return redirect("view_student")
+@login_required
+@admin_required 
 def edit_book(request,id):
     books = Book.objects.get(id=id)
     if request.method == "POST":
@@ -238,6 +265,7 @@ def edit_book(request,id):
         books.save()
         return render(request,'view_book.html',{'books':book})
     return render(request,'edit_book.html',{'book':books})
+@login_required
 
 def staff_edit_profile(request):
     staff = Staff.objects.get(user=request.user)
@@ -262,7 +290,8 @@ def staff_edit_profile(request):
         return render(request, "staff_profile.html")
     else:
         return render(request, "staff_edit_profile.html")
-    
+@login_required
+@admin_required 
 def issue_book_to_staff(request):
     if request.method == 'POST':
         form = staffIssuedBookForm(request.POST)
@@ -271,80 +300,108 @@ def issue_book_to_staff(request):
             staff_id=selected_staff.staff_id
             selected_book = form.cleaned_data['book']
             book_name = selected_book.name 
-            book=staffIssuedBook.objects.filter(staff_id=staff_id).count
-            if(book >4):
+            book=staffIssuedBook.objects.filter(staff_id=staff_id).count()
+            Book_isbn=Book.objects.filter(name=book_name).first()
+            if(book>4):
                 messages.info(request,'one staff cannot take morethan 4 book')
                 return render(request, 'issue_book_to_staff.html')
             else:
-                staffIssuedBook.objects.create(staff_id=staff_id, book=book_name)
+                staffIssuedBook.objects.create(staff_id=staff_id, book=book_name,isbn=Book_isbn.isbn)
                 return redirect('admin_dashboard')  
     else:
         form = staffIssuedBookForm()
     return render(request, 'staff_issue_book.html', {'form': form})
+@login_required
 
 def view_staff_issued_book(request):
-    if(request.user.is_staff and not request.user.is_superuser):
-        issuedBooks=staffIssuedBook.objects.filter(staff_id=request.user.staff.staff_id)
-    else:
+    template_name = None  # Initialize template_name
+
+    if request.user.is_superuser:
+        template_name = 'admin_dashboard.html'
         issuedBooks = staffIssuedBook.objects.all()
-    
+    elif request.user.is_staff:
+        template_name = 'dashboard.html'
+        issuedBooks = staffIssuedBook.objects.filter(staff_id=request.user.staff.staff_id)
+
+
     details = []
-    for issuedBook in issuedBooks:                                      
-      
+    for issuedBook in issuedBooks:
         try:
-        
             book = Book.objects.get(name=issuedBook.book)
             staff = Staff.objects.get(staff_id=issuedBook.staff_id)
             detail = (
-                    staff.user.username, 
-                    staff.staff_id,
-                     book.name,
-                    book.isbn,
-                    issuedBook.issued_date,
-                    issuedBook.expiry_date,
-                    issuedBook.fine
-                    )
-            if request.user.is_superuser:
-                template_name = 'admin_dashboard.html'
-            else:
-                template_name = 'dashboard.html'
+                staff.user.username,
+                staff.staff_id,
+                book.name,
+                book.isbn,
+                issuedBook.issued_date,
+                issuedBook.expiry_date,
+                issuedBook.fine
+            )
             details.append(detail)
         except Book.DoesNotExist:
             print(f"Book with ISBN {issuedBook.book} does not exist.")
         except Staff.DoesNotExist:
             print(f"Staff with ID {issuedBook.staff_id} does not exist.")
 
-    return render(request, "view_staff_issued_books.html", {'issuedBooks': issuedBooks, 'details': details,'template_name':template_name})
+    return render(request, "view_staff_issued_books.html", {'issuedBooks': issuedBooks, 'details': details, 'template_name': template_name})
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import studentIssuedBookForm
+from .models import Book, studentIssuedBook
 
+@login_required
 def issue_book_to_student(request):
+    # Determine the template based on user type
+    template_name = 'dashboard.html'  # Default for staff
+    if request.user.is_superuser:
+        template_name = 'admin_dashboard.html'
+    
     if request.method == 'POST':
         form = studentIssuedBookForm(request.POST)
         if form.is_valid():
-            selected_student= form.cleaned_data['student_register_no']
-            register_no=selected_student.register_no
+            selected_student = form.cleaned_data['student_register_no']
+            register_no = selected_student.register_no
             selected_book = form.cleaned_data['book']
             book_name = selected_book.name  
-            book=Book.objects.filter(name=book_name).first()
-            studentIssuedBook.objects.create(student_register_no=register_no, book=book_name,isbn=book.isbn)
-            return redirect('admin_dashboard')  
+            book = Book.objects.filter(name=book_name).first()
+            
+            if book:  # Check if the book exists before creating the entry
+                studentIssuedBook.objects.create(
+                    student_register_no=register_no, 
+                    book=book_name, 
+                    isbn=book.isbn
+                )
+                # Redirect based on user type
+                return redirect(template_name)  
+            else:
+                form.add_error('book', 'Selected book does not exist.')
     else:
         form = studentIssuedBookForm()
-    return render(request, 'student_issue_book.html', {'form': form})
+    
+    # Render the form with the correct template
+    return render(request, 'student_issue_book.html', {'form': form, 'template_name': template_name})
 
+@login_required
 def view_student_issued_book(request):
+    template_name = None  # Initialize template_name
+    if request.user.is_superuser:
+            template_name = 'admin_dashboard.html'
+    else:
+            template_name = 'dashboard.html'  # Initialize template_name
     if(request.user.is_student):
         issuedBooks=studentIssuedBook.objects.filter(student_register_no=request.user.student.register_no)
     else:
         issuedBooks = studentIssuedBook.objects.all()
-    
+
     details = []
     for issuedBook in issuedBooks:
         try:
-            
+
             book = Book.objects.get(name=issuedBook.book)
             student = Student.objects.get(register_no=issuedBook.student_register_no)
             detail = (
-                student.user.username, 
+                student.user.username,
                 student.register_no,
                 book.name,
                 book.isbn,
@@ -365,16 +422,29 @@ def view_student_issued_book(request):
         except Student.DoesNotExist:
             print(f"student with ID {issuedBook.student_id} does not exist.")
     return render(request, "view_student_issued_books.html", {'issuedBooks': issuedBooks, 'details': details,'template_name':template_name})
-
+@login_required
 def student_return_book(request, id, isbn):
     book = studentIssuedBook.objects.filter(student_register_no=id, isbn=isbn).first()
     book.delete()
-    return redirect(reverse('view_student_books'))
+    if request.user.is_superuser:
+        template_name = 'admin_dashboard.html'
+    else:
+        template_name = 'dashboard.html'
+        
+    return render(request,"view_student_issued_books.html",{'template_name':template_name})   
+
+@login_required
 
 def staff_return_book(request,id,isbn):
-    book=staffIssuedBook.objects.filter(staff_id=id,isbn=isbn)
+    book=staffIssuedBook.objects.filter(staff_id=id,isbn=isbn).first()
     book.delete()
-    return redirect('view_staff_books')
+    if request.user.is_superuser:
+        template_name = 'admin_dashboard.html'
+    else:
+        template_name = 'dashboard.html'
+        
+    return render(request,"view_staff_issued_books.html",{'template_name':template_name})   
+@login_required
 
 def fine(request):
     if(request.user.is_student):

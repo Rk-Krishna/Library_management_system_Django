@@ -10,7 +10,7 @@ class User(AbstractUser):
 class Book(models.Model):
     name = models.CharField(max_length=200)
     author = models.CharField(max_length=200)
-    isbn = models.CharField(max_length=13, unique=True)  # Changed to CharField for 13-digit ISBN
+    isbn = models.CharField(max_length=13, unique=True)
     category = models.CharField(max_length=50)
     publication = models.CharField(max_length=100)
 
@@ -28,10 +28,10 @@ class Student(models.Model):
         return f"{self.user} [{self.dept}] [{self.register_no}]"
 
 def expiry():
-    return datetime.today() + timedelta(days=14)
+    return date.today() + timedelta(days=14)
 
 def expiry1():
-    return datetime.today() + timedelta(days=29)
+    return date.today() + timedelta(days=29)
 
 class StudentIssuedBookManager(models.Manager):
     def get_queryset(self):
@@ -98,7 +98,8 @@ class staffIssuedBook(models.Model):
     fine = models.DecimalField(max_digits=6, decimal_places=2, default=0.00) 
     objects = StaffIssuedBookManager()
     def calculate_fine(self):
-        today = date.today() 
+        today =date.today() 
+        
         if self.expiry_date < today:
             overdue_days = (today - self.expiry_date).days
             if(overdue_days>45):
